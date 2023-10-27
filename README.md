@@ -4,11 +4,11 @@
 
 Sketch to simulate the keypad of an old [TI-30 calculator][1] (original model, with the bubble-lens LEDs).
 
-I purchased a lot of "for parts or repair" TI-30 calculators on Ebay. After mixing and matching some parts to make a couple working units, I ended up with an extra processor/display board with a non-working keypad.
+I purchased a lot of "for parts or repair" TI-30 calculators on Ebay. After mixing and matching some parts to make a couple working units, I ended up with an extra processor/display board with a non-working keypad, so I decided to try to use an Arduino as a keypad replacement.
 
 ## Hardware
 
-The TI-30 calculator has a surprisingly simple hardware design. The calculator processosr and LED driver functions are all contained in a single chip (TI TMC0981NL) without the need for any additional support circuitry: no crystal, no resistors, no capacitors. The only other components are the LEDs themselves (bonded directly to the PCB), the keypad, and a 9 V (PP3) battery clip.
+The TI-30 calculator has a surprisingly simple hardware design. The calculator processosr and LED driver functions are all contained in a single chip (TI TMC0981NL) without the need for any support circuitry: no crystal, no resistors, no capacitors. The only other components are the LEDs themselves (bonded directly to the PCB), the keypad, and a 9 V (PP3) battery clip.
 
 ### TI-30 Processor/Display Board and Keypad Pinouts
 
@@ -85,11 +85,11 @@ In the table below, keypad columns are numbered left to right (i.e., `1/x` is in
 | 11  | Keypad Row 1 / LED Segment dp |
 | 12  | Keypad Row 7 / LED Segment b  |
 | 13  | Keypad Row 2 / LED Segment g  |
-| 14  | Keypad Row 5 / LED Segment d |
+| 14  | Keypad Row 5 / LED Segment d  |
 | 15  | LED Segment a                 |
 | 16  | Keypad Row 3 / LED Segment f  |
-| 17  | Keypad Row 4 / LED Segment e |
-| 18  | Keypad Row 6 / LED Segment c |
+| 17  | Keypad Row 4 / LED Segment e  |
+| 18  | Keypad Row 6 / LED Segment c  |
 | 19  | No connection |
 | 20  | 9V Positive (Vss) / Keypad Row 8 / Chip Pin 4  |
 | 21  | No connection |
@@ -112,22 +112,45 @@ f       b
 |       |
 e       c
 |       |
---- d ---
+--- d ---  dp
 ```
 
 ### Connecting to Arduino
 
 ... Include info on voltages, diodes, resistors, voltage dividers, power needs.
+... Row scans at 5.6 V --> 10K/10K divider to about 2.8 V to MSP input pin
+... MSP output of about 3.24 V is sufficient for calculator chip to detect keypress (TTL logic?)
+... Rows are not physically connected to columns with the simulator... it is done internal to the MSP with separate input and output pins
+... Row 8 is always at Vss/9V, so needs a different way to connect to pin 13 to turn on calculator. Row 8 does not need to be monitored by MSP (since it is always high), but need a way to connect it to pin 6 (which is connected to MSP) to turn on calculator without going over MSP Vmax. 3.3V from MSP is not enough to turn on calculator.
+... Need 5 output pins (colums) and 7 input pins (rows) (row 8 is always high, so not connected). May need one more pin to control a transistor to turn on calculator (need some isolation between keypad pin 13 and MSP when connected to 9V)
 
-### Signalling (maybe put under the display board heading)
+### Keypad and LED Scannning
 
-... Explain how keyboard is scanned (using actual experimental results): rate, voltages, ....
+The calculator chip uses the same pins to scan the keypad rows and multiplex the LED segments (except for segment a and row 8, explained below). Every LED digit is cycled during each keypad row scan.
 
-... Explain shared signals and how that may impact operation ...
+A keypress is detected with a HIGH signal on the corresponding column pin. If a button is not pressed, then the column pin will be floating externally, but will read low because the column pins are apparently loosely pulled low internal to the chip. The calculator chip has built-in debounce functionality, but it is not the most robust and will sometime record multiple keystrokes from a single press of a key.
+
+If an LED segment should be turned on during the row scan, then the row signal will be pulled low for **~xx** us at the same time that the corresponding digit pin is pulled high. Note that since the row signal is pulled low to turn on the LED, any keypresses at that time will not be detected.
+
+Row 8 is tied to Vss (9V battery +), so it cannot be used to control a segment (since it is always high). Therefore, LED segment a has a dedicated control signal, **and is it high all the time except when segment a is turned on, or does it cycle on/off?**.
+
+LED digit 9 does not display numeric digits and only segments b, g, f, and dp are present.
+
+#### Scan Timing
+
+The sketch included with this repo monitors when the row signal goes high. If a key in that row is to be simulated as pressed, then the corresponding column signal is set HIGH. Once the row signal goes low again, the column signal is set LOW. It takes about 10 us for the sketch to detect a level change and update the column pin (using `digitalRead()` and `digitalWrite()`).
+
+Scanning all 8 rows takes about 5.6 ms, with rows 1 through 7 taking about 670 us each for rows 1 through 7 and row 8 taking about 930 us. Row 8 probably takes longer because it does not have a dedicated scan signal, so the extra time may be some sort of "guard" time to make the keypress reading more reliable.
+
+When a button is initially pressed (i.e., column pin goes high when row pin is high), the controller chip stops the row scanning (but continues with the LED multiplexing) and holds the row pin high for about 13.5 ms (2 full row scans). This is probably related to the debounce functionality. After that initial delay, the row scanning conntinues normally.
+
+**Confirm numbers: each digit is on about 30 us, with about 5.5 ms between digits???**
+**Off state is segment high, digit low??? and reversed biased or no bias??**
 
 ## Software
 
 .... Explain how the sketch works .....
+.... Setting for "keybounce" time -- essentially the number of row scans that the button remains "pressed". I have found that a value of 0 (meaning one row scan time) works most of the time with a small number of missed keypresses. A value of 1 (2 row scan times) has consistently registered correctly.
 
 ## External Libraries
 
@@ -141,8 +164,8 @@ e       c
 
 - TI-30 Calculator  [reference text][1]
 - Keypad, processor chip, LED pinout summary by [Sean Riddle][2]
-  - This was used as a starting point for my pinout summary above
-  - There is at least one typo in Sean's summary that is corrected in my tables
+  - This was used as a starting point for my pinout summary above. I fixed a typo (pin 4 should be row 8 not 6) and included additional information.
+- EdTech [article][4] about the TI-30
 
 ## License
 
@@ -151,6 +174,7 @@ The software and other files in this repository are released under what is commo
 [1]: http://www.datamath.org/Sci/MAJESTIC/TI-30.htm
 [2]: https://seanriddle.com/ti30.txt
 [3]: ./extras/jpg/TI-30_annotated.jpg
+[4]: https://edtechmagazine.com/k12/article/2016/11/ti-30-launched-electronic-calculating-math-classroom
 [100]: https://choosealicense.com/licenses/mit/
 [101]: ./LICENSE.txt
 [//]: # ([200]: https://github.com/Andy4495/Template-Repo)
