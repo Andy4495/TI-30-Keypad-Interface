@@ -117,6 +117,8 @@ e       c
 
 ### Connecting to Arduino
 
+Keypad pin 13 is used for column 5 and to turn on the calculator. To turn on the calculator, the pin needs to be pulled to around 9 V. Since it is also used by the Arduino for column 5, it needs to be isolated from the 9 V signal. So there needs to be a diode between the Arduino and keypad pin 13 (anode to Arduino, cathode to keypad pin 13). The diode will block the 9 V signal, but allow the Arduino column 5 control signal to signal a row 5 keypress to the calculator chip. I used a standard 1N4148 diode, and the forward voltage drop of ~0.6 V did not impact operation.
+
 ... Include info on voltages, diodes, resistors, voltage dividers, power needs.
 ... Row scans at 5.6 V --> 10K/10K divider to about 2.8 V to MSP input pin
 ... MSP output of about 3.24 V is sufficient for calculator chip to detect keypress (TTL logic?)
