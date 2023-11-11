@@ -73,7 +73,8 @@ byte TI30::getCol(KEYNAME k) {
 
 // "r" is a value from 1 to 8 (i.e., it matches the 1-relative counting used by the documentation)
 byte TI30::rowState(byte r) {
-  return digitalRead(_row[r - 1]);
+  byte rs = digitalRead(_row[r - 1]);
+  return rs;
 }
 
 keylist::keylist(uint16_t size) {

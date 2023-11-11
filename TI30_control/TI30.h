@@ -44,11 +44,11 @@ public:
   void releaseKey(KEYNAME k);
   void pressKeyBlocking(KEYNAME k);
   byte rowState(byte r);  // "r" is a value from 1 to 8, with row 1 being the bottom calculator row
+  byte getRow(KEYNAME k); 
 
 private:
   byte _row[7];  // Allocate 8 elements, but array index 7 (calculator row 8) is not used
   byte _col[5];
-  byte getRow(KEYNAME k); 
   byte getCol(KEYNAME k);
 };
 

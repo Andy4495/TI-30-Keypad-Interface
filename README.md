@@ -6,6 +6,24 @@ Sketch to simulate the keypad of an old [TI-30 calculator][1] (original model, w
 
 I purchased a lot of "for parts or repair" TI-30 calculators on Ebay. After mixing and matching some parts to make a couple working units, I ended up with an extra processor/display board with a non-working keypad, so I decided to try to use an Arduino as a keypad replacement.
 
+## Status
+
+As of 10-Nov-2023:
+
+- The code works -- all rows and columns are scanned and key presses registered
+
+To-dos:
+
+- Add a separate WAIT pseudo-keypress (in addition to NO_KEY) to program a wait between keypresses. This could be useful for calculations known to take a while (see Notes below).
+- Clean up code. Should some states be added or removed?
+- Can any functionality be moved to the class instead of the sketch?
+- Would it be better to put the keypad definition inside a class or in its own namespace?
+- Finish documenting the "..." parts in this README.
+
+Notes:
+
+- Some operations take a while to compute (for example: sine, cosine, factorial). In this case, the calculator chip misses keypresses.
+
 ## Hardware
 
 The TI-30 calculator has a surprisingly simple hardware design. The calculator processosr and LED driver functions are all contained in a single chip (TI TMC0981NL) without the need for any support circuitry: no crystal, no resistors, no capacitors. The only other components are the LEDs themselves (bonded directly to the PCB), the keypad, and a 9 V (PP3) battery clip.
