@@ -22,10 +22,16 @@ enum KEYNAME {
   RCL,   FOUR,  FIVE,  SIX,   SUB,  // SUB is -
   SUM,   ONE,   TWO,   THREE, ADD,
   EXC,   ZERO,  DOT,   PLUSMINUS, EQUAL,  // PLUSMINUS is +/-
-  NO_KEY = 99                       // Used as a marker to "do nothing"
+  // "Special" keys that don't indicate an actual keypress are all > 99
+  SPECIALKEYS = 99,
+  NOKEY,                            // Returned from get_key() if list is empty
+  DUMMYKEY,                         // Used as a key entry to "do nothing"
+  WAIT1000,                         // State machine waits a second before sending next keypress
+  WAIT500,                          // -- half a second
+  WAIT100,                          // -- tenth of a second
 };
 
-// Calculating array index from KEYNAME enum:
+// Calculating array index from KEYNAME enum (for keys < 99):
 // ROW is 8 - (KEYNAME / 5) - 1   --> 0 - 7
 // COL is KEYNAME % 5             --> 0 - 4
 
@@ -56,7 +62,7 @@ class keylist {
 public:
   keylist(uint16_t size);
   int add_key(KEYNAME k);  // returns 0 on success; 1 if list is full
-  KEYNAME get_key();     // returns NO_KEY if list is empty
+  KEYNAME get_key();     // returns NOKEY if list is empty
   void clear_list();     // clears the list
 
 private:

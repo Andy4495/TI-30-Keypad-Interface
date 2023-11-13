@@ -15,7 +15,12 @@
 TI30 ti30(15, 19, 11, 12, 14, 13, 18,
           10, 9, 8, 7, 6);
 
-keylist myKeys(32);
+KEYNAME theKeys[] = {
+  SEVEN, FIVE, ZERO, ADD,
+  DUMMYKEY, THREE, EQUAL, 
+  OnC, PIE, X2, COS
+};
+keylist myKeys(sizeof(theKeys)/sizeof(theKeys[0]));
 
 #define LOOP_DELAY 1000
 #define KEYBOUNCE_CYCLES 1
@@ -25,7 +30,7 @@ unsigned long prev_millis = 0;
 unsigned long curr_millis;
 bool scan_trigger = false;
 int bounce_count = 0;
-KEYNAME current_key = NO_KEY;
+KEYNAME current_key = NOKEY;
 uint8_t current_row = 1;
 
 // States
@@ -46,20 +51,20 @@ STATE state = START_SCAN_CYCLE;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("TI-30 Calculator Keyboard v3");
-  ti30.begin();
-  if (myKeys.add_key(SEVEN)) Serial.println("Error adding key");
-  if (myKeys.add_key(FIVE)) Serial.println("Error adding key");
-  if (myKeys.add_key(ZERO)) Serial.println("Error adding key");
-  if (myKeys.add_key(ADD)) Serial.println("Error adding key");
-  if (myKeys.add_key(NO_KEY)) Serial.println("Error adding key");
-  if (myKeys.add_key(THREE)) Serial.println("Error adding key");
-  if (myKeys.add_key(EQUAL)) Serial.println("Error adding key");
-  if (myKeys.add_key(OnC)) Serial.println("Error adding key");
-  if (myKeys.add_key(PIE)) Serial.println("Error adding key");
-  if (myKeys.add_key(X2)) Serial.println("Error adding key");
-  if (myKeys.add_key(COS)) Serial.println("Error adding key");
+  Serial.println("TI-30 Calculator Keyboard v4");
 
+  ti30.begin();
+  for (unsigned int i = 0; i < sizeof(theKeys)/sizeof(theKeys[0]); i++) {
+    if (myKeys.add_key(theKeys[i])) {
+      Serial.print("Error adding key: ");
+      Serial.print(theKeys[i]);
+      Serial.print(" index: ");
+      Serial.println(i);
+    } else {
+      Serial.print("Adding key: ");
+      Serial.println(theKeys[i]);
+    }
+  }
 }
 
 void loop() {
@@ -70,7 +75,7 @@ void loop() {
       current_key = myKeys.get_key();
       state = NEXT_ROW_SCAN;
       current_row = 1;
-      if (current_key != NO_KEY) { /// 
+      if (current_key != NOKEY) { /// 
         Serial.print("New key: ");         ///
         Serial.println(int(current_key));  ///
       } ///
@@ -85,7 +90,7 @@ void loop() {
 
     // Check the keypress queue to see if next key is for this row
     case IS_KEY_IN_THIS_ROW:
-      if (current_key == NO_KEY)  {
+      if (current_key >= SPECIALKEYS)  {
         state = SKIP_THIS_ROW;
       } else {
         if ( (ti30.getRow(current_key) + 1) != current_row ) {

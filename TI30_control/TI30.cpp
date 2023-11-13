@@ -39,13 +39,13 @@ void TI30::begin() {
 }
 
 void TI30::pressKey(KEYNAME k) {
-  if (k != NO_KEY) {
+  if (k < SPECIALKEYS) {
     digitalWrite(_col[getCol(k)], HIGH);
   }
 }
 
 void TI30::releaseKey(KEYNAME k) {
-  if (k != NO_KEY) {
+  if (k < SPECIALKEYS) {
     digitalWrite(_col[getCol(k)], LOW);
   }
 }
@@ -54,7 +54,7 @@ void TI30::releaseKey(KEYNAME k) {
 // Normal functionality should be implemented with a state machine
 // Note that pressKeyBlocking() will not work on ROW 8 (1/x, x^2, ... ON/C) because the row is always high
 void TI30::pressKeyBlocking(KEYNAME k) {
-  if (k != NO_KEY) {
+  if ( (k < SPECIALKEYS) || (k < INV) ) {
     while (rowState(getRow(k)) == LOW) ;  // Empty statement; loop until row goes HIGH
     pressKey(k);
     while (rowState(getRow(k)) == HIGH);  // Empty statement; loop until row goes LOW
@@ -99,7 +99,7 @@ int keylist::add_key(KEYNAME k) {
   return retval;
 }
 
-// returns NO_KEY if list is empty
+// returns NOKEY if list is empty
 KEYNAME keylist::get_key(){
   KEYNAME retval;
   if (keys_in_list > 0) {
@@ -107,7 +107,7 @@ KEYNAME keylist::get_key(){
     if (++pop_position >= list_size) pop_position = 0;
     if (keys_in_list > 0) keys_in_list--;
   } else {
-    retval = NO_KEY;
+    retval = NOKEY;
   }
   return retval;
 }
