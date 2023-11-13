@@ -1,10 +1,10 @@
 # TI-30 Keypad Interface
 
-[![Check Markdown Links](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml)
+[![Arduino Compile Sketches](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml) [![Check Markdown Links](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml)
 
 Sketch to simulate the keypad of an old [TI-30 calculator][1] (original model, with the bubble-lens LEDs).
 
-I purchased a lot of "for parts or repair" TI-30 calculators on Ebay. After mixing and matching some parts to make a couple working units, I ended up with an extra processor/display board with a non-working keypad, so I decided to try to use an Arduino as a keypad replacement.
+I purchased a lot of "for parts or repair" TI-30 calculators on eBay. After mixing and matching some parts to make a few working units, I ended up with an extra processor/display board with a non-working keypad and a broken case, so I decided to try to use an Arduino as a keypad replacement.
 
 ## Status
 
@@ -135,7 +135,11 @@ e       c
 
 ### Connecting to Arduino
 
-Keypad pin 13 is used for column 5 and to turn on the calculator. To turn on the calculator, the pin needs to be pulled to around 9 V. Since it is also used by the Arduino for column 5, it needs to be isolated from the 9 V signal. So there needs to be a diode between the Arduino and keypad pin 13 (anode to Arduino, cathode to keypad pin 13). The diode will block the 9 V signal, but allow the Arduino column 5 control signal to signal a row 5 keypress to the calculator chip. I used a standard 1N4148 diode, and the forward voltage drop of ~0.6 V did not impact operation.
+...Keypad row pins
+
+...Keypad column pins
+
+Keypad pin 13 has two purposes: 1) column 5 keypad keypad matrix signal and 2) power on the calculator. To power on the calculator, the pin needs to be pulled to ~9 V. That is above the maximum rating for a microcontroller pin, so there needs to be isolation between the Arduino output and the 9 V signal. I used a standard 1N4148 diode between the Arduino and keypad pin 13 (anode to Arduino, cathode to keypad pin 13). The diode will block the 9 V signal from affecting the Arduino, but allow the Arduino output pin to signal a column 5 keypress to the calculator chip. The diode forward voltage drop of ~0.6 V did not impact operation.
 
 ... Include info on voltages, diodes, resistors, voltage dividers, power needs.
 ... Row scans at 5.6 V --> 10K/10K divider to about 2.8 V to MSP input pin
@@ -160,7 +164,7 @@ LED digit 9 does not display numeric digits and only segments b, g, f, and dp ar
 
 The sketch included with this repo monitors when the row signal goes high. If a key in that row is to be simulated as pressed, then the corresponding column signal is set HIGH. Once the row signal goes low again, the column signal is set LOW. It takes about 10 us for the sketch to detect a level change and update the column pin (using `digitalRead()` and `digitalWrite()`).
 
-Scanning all 8 rows takes about 5.6 ms, with rows 1 through 7 taking about 670 us each for rows 1 through 7 and row 8 taking about 930 us. Row 8 probably takes longer because it does not have a dedicated scan signal, so the extra time may be some sort of "guard" time to make the keypress reading more reliable.
+Scanning all 8 rows takes about 5.6 ms, with rows 1 through 7 taking about 670 us each and row 8 taking about 930 us. Row 8 probably takes longer because it does not have a dedicated scan signal, so the extra time may be some sort of "guard" time to make the keypress reading more reliable.
 
 When a button is initially pressed (i.e., column pin goes high when row pin is high), the controller chip stops the row scanning (but continues with the LED multiplexing) and holds the row pin high for about 13.5 ms (2 full row scans). This is probably related to the debounce functionality. After that initial delay, the row scanning conntinues normally.
 
