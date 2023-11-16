@@ -15,14 +15,18 @@ As of 10-Nov-2023:
 To-dos:
 
 - Add a separate WAIT pseudo-keypress (in addition to NO_KEY) to program a wait between keypresses. This could be useful for calculations known to take a while (see Notes below).
-- Clean up code. Should some states be added or removed?
+- Add a REPEAT pseudo-keypress. This restarts the keypress cycle from the begining of the keylist.
+- Add an END pseudo-keypress. This may be useful in debugging to stop the keypresses in the middle of a list without having to update the list.
+- Clean up code.
 - Can any functionality be moved to the class instead of the sketch?
 - Would it be better to put the keypad definition inside a class or in its own namespace?
 - Finish documenting the "..." parts in this README.
+- Add a turn-on circuit (currently use a physical NO button). Would need another digital output controlling a transistor.
+- 
 
 Notes:
 
-- Some operations take a while to compute (for example: sine, cosine, factorial). In this case, the calculator chip misses keypresses.
+- Some operations take a while to compute (for example: sine, cosine, factorial). In these cases, the calculator chip misses keypresses during the calculation.
 
 ## Hardware
 

@@ -36,11 +36,10 @@ uint8_t current_row = 1;
 // States
 enum STATE {
   START_SCAN_CYCLE,
-  NEXT_ROW_SCAN,
-  IS_KEY_IN_THIS_ROW,
+  SCAN_ROWS_1_TO_7,
   START_KEYPRESS,
   CONTINUE_KEYPRESS,
-  ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN,
+  ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROWS_1_TO_7,
   SKIP_THIS_ROW,
   ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8,
   ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8_PART_2,
@@ -73,7 +72,7 @@ void loop() {
   switch (state) {
     case START_SCAN_CYCLE:
       current_key = myKeys.get_key();
-      state = NEXT_ROW_SCAN;
+      state = SCAN_ROWS_1_TO_7;
       current_row = 1;
       if (current_key != NOKEY) { /// 
         Serial.print("New key: ");         ///
@@ -81,23 +80,18 @@ void loop() {
       } ///
       break;
 
-    // Row scan inactive and previous key press is complete
-    // Wait for next row scan
-    // This state is skipped for row 8 (because it is always high)
-    case NEXT_ROW_SCAN:
-      if (ti30.rowState(current_row) == HIGH) state = IS_KEY_IN_THIS_ROW;
-      break;
-
     // Check the keypress queue to see if next key is for this row
-    case IS_KEY_IN_THIS_ROW:
-      if (current_key >= SPECIALKEYS)  {
-        state = SKIP_THIS_ROW;
-      } else {
-        if ( (ti30.getRow(current_key) + 1) != current_row ) {
+    case SCAN_ROWS_1_TO_7:
+      if (ti30.rowState(current_row) == HIGH) {
+        if (current_key >= SPECIALKEYS)  {
           state = SKIP_THIS_ROW;
         } else {
-          state = START_KEYPRESS;
-        } 
+          if ( (ti30.getRow(current_key) + 1) != current_row ) {
+            state = SKIP_THIS_ROW;
+          } else {
+            state = START_KEYPRESS;
+          } 
+        }
       }
       break;
 
@@ -120,7 +114,7 @@ void loop() {
           state = WAIT_A_SECOND;                /// Delete this and uncomment next once done
           ///          state = NEXT_ROW_SCAN
         } else {
-          if (current_row < MAX_ROW) state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN;
+          if (current_row < MAX_ROW) state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROWS_1_TO_7;
           else state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8;
         }
       }
@@ -128,7 +122,7 @@ void loop() {
 
     // Row scan ended, but still want to keep key pressed long enough to
     // get through debounce filter
-    case ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN:
+    case ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROWS_1_TO_7:
       if (current_row < MAX_ROW && ti30.rowState(current_row) == HIGH){
         state = CONTINUE_KEYPRESS;
         ti30.pressKey(current_key);
@@ -136,7 +130,9 @@ void loop() {
       break;
 
     case ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8:
-      if (current_row == MAX_ROW && ti30.rowState(current_row - 1) == HIGH) state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8_PART_2;
+      if (current_row == MAX_ROW && ti30.rowState(current_row - 1) == HIGH) {
+        state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8_PART_2;
+      }
       break;
 
     case ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8_PART_2: 
@@ -151,11 +147,10 @@ void loop() {
       if (current_row < MAX_ROW) {
         if (ti30.rowState(current_row) == LOW) {
           current_row++;
-          if (current_row < MAX_ROW) state = NEXT_ROW_SCAN;  // For row 8, there is no row signal
+          if (current_row < MAX_ROW) state = SCAN_ROWS_1_TO_7;  // For row 8, there is no row signal
         }
       } else {
-        // Special handling for row 8, so need to look when row 1 starts again
-        // Skip NEXT_ROW_SCAN state because we are already checking it here
+        // Special handling for row 8: need to look when row 1 starts again
         if (ti30.rowState(1) == HIGH) {
           state = START_SCAN_CYCLE;
         }
