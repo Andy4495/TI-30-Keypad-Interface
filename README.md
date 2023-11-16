@@ -22,11 +22,13 @@ To-dos:
 - Would it be better to put the keypad definition inside a class or in its own namespace?
 - Finish documenting the "..." parts in this README.
 - Add a turn-on circuit (currently use a physical NO button). Would need another digital output controlling a transistor.
-- 
+- Add a voltage regulator and power switch so that the calculator and Arduino can run from a single power supply/battery.
+- Create a second sketch which reads characters from serial input instead of using keylist.
 
 Notes:
 
 - Some operations take a while to compute (for example: sine, cosine, factorial). In these cases, the calculator chip misses keypresses during the calculation.
+- The sketch gets "stuck" if the calcultor chip is off (because the sketch is expecting the row signals to sequence through HIGH and LOW levels).
 
 ## Hardware
 
@@ -171,6 +173,8 @@ The sketch included with this repo monitors when the row signal goes high. If a 
 Scanning all 8 rows takes about 5.6 ms, with rows 1 through 7 taking about 670 us each and row 8 taking about 930 us. Row 8 probably takes longer because it does not have a dedicated scan signal, so the extra time may be some sort of "guard" time to make the keypress reading more reliable.
 
 When a button is initially pressed (i.e., column pin goes high when row pin is high), the controller chip stops the row scanning (but continues with the LED multiplexing) and holds the row pin high for about 13.5 ms (2 full row scans). This is probably related to the debounce functionality. After that initial delay, the row scanning conntinues normally.
+
+Each `loop()` takes about 20 us on a 16 MHz MSP430 processor.
 
 **Confirm numbers: each digit is on about 30 us, with about 5.5 ms between digits???**
 **Off state is segment high, digit low??? and reversed biased or no bias??**
