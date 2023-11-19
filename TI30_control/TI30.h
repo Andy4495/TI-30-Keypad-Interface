@@ -26,6 +26,9 @@ enum KEYNAME {
   SPECIALKEYS = 99,
   NOKEY,                            // Returned from get_key() if list is empty
   DUMMYKEY,                         // Used as a key entry to "do nothing"
+  REPEAT_KEYS,                      // Sets the keylist pointer back to the beginning of the list
+  END_KEY,                          // Can be used to signal end of list without editing the list
+  WAIT_DELAYS = 199,
   WAIT1000,                         // State machine waits a second before sending next keypress
   WAIT500,                          // -- half a second
   WAIT100,                          // -- tenth of a second
@@ -62,8 +65,9 @@ class keylist {
 public:
   keylist(uint16_t size);
   int add_key(KEYNAME k);  // returns 0 on success; 1 if list is full
-  KEYNAME get_key();     // returns NOKEY if list is empty
-  void clear_list();     // clears the list
+  KEYNAME get_key();       // returns NOKEY if list is empty
+  void clear_list();       // clears the list
+  void start_list();       // go back to the beginning of the list
 
 private:
   uint16_t push_position;

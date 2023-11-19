@@ -91,7 +91,7 @@ int keylist::add_key(KEYNAME k) {
   if (keys_in_list < list_size) {
     keys[push_position] = k;
     keys_in_list++;
-    if (++push_position >= list_size) push_position = 0;
+    ++push_position;
     retval = 0;
   } else {
     retval = 1;
@@ -102,10 +102,8 @@ int keylist::add_key(KEYNAME k) {
 // returns NOKEY if list is empty
 KEYNAME keylist::get_key(){
   KEYNAME retval;
-  if (keys_in_list > 0) {
-    retval = keys[pop_position];
-    if (++pop_position >= list_size) pop_position = 0;
-    if (keys_in_list > 0) keys_in_list--;
+  if (pop_position < keys_in_list) {
+    retval = keys[pop_position++];
   } else {
     retval = NOKEY;
   }
@@ -115,5 +113,9 @@ KEYNAME keylist::get_key(){
 void keylist::clear_list() {
   keys_in_list = 0;
   push_position = 0;
+  pop_position = 0;
+}
+
+void keylist::start_list() {
   pop_position = 0;
 }

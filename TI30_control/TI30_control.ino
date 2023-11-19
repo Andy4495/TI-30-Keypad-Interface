@@ -16,10 +16,16 @@ TI30 ti30(15, 19, 11, 12, 14, 13, 18,
           10, 9, 8, 7, 6);
 
 KEYNAME theKeys[] = {
-  SEVEN, FIVE, ZERO, ADD,
+/*  SEVEN, FIVE, ZERO, ADD,
   DUMMYKEY, THREE, EQUAL, 
-  OnC, PIE, X2, COS
+  OnC, PIE, X2, COS */
+  OnC,
+  ONE, WAIT1000, TWO, WAIT1000, THREE, WAIT1000, ADD,
+  FOUR, WAIT500, FIVE, WAIT500, SIX, WAIT500, EQUAL,
+  WAIT1000, WAIT1000,
+  REPEAT_KEYS
 };
+
 keylist myKeys(sizeof(theKeys)/sizeof(theKeys[0]));
 
 #define LOOP_DELAY 1000
@@ -28,6 +34,7 @@ keylist myKeys(sizeof(theKeys)/sizeof(theKeys[0]));
 
 unsigned long prev_millis = 0;
 unsigned long curr_millis;
+unsigned long wait_time = 0;
 bool scan_trigger = false;
 int bounce_count = 0;
 KEYNAME current_key = NOKEY;
@@ -43,14 +50,14 @@ enum STATE {
   SKIP_THIS_ROW,
   ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8,
   ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8_PART_2,
-  WAIT_A_SECOND  /// Delete this once done
+  WAIT_STATE
 };
 
 STATE state = START_SCAN_CYCLE;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("TI-30 Calculator Keyboard v4");
+  Serial.println("TI-30 Calculator Keyboard v5");
 
   ti30.begin();
   for (unsigned int i = 0; i < sizeof(theKeys)/sizeof(theKeys[0]); i++) {
@@ -72,12 +79,42 @@ void loop() {
   switch (state) {
     case START_SCAN_CYCLE:
       current_key = myKeys.get_key();
-      state = SCAN_ROWS_1_TO_7;
-      current_row = 1;
-      if (current_key != NOKEY) { /// 
-        Serial.print("New key: ");         ///
-        Serial.println(int(current_key));  ///
-      } ///
+      if (current_key == REPEAT_KEYS) {
+        myKeys.start_list();
+        current_key = myKeys.get_key();
+      }
+      if (current_key == END_KEY) {
+        myKeys.clear_list();
+        current_key = myKeys.get_key();
+      }
+      if (current_key > WAIT_DELAYS) {
+        state = WAIT_STATE;
+        prev_millis = curr_millis;
+        switch (current_key) {
+          case WAIT1000:
+            wait_time = 1000;
+            break;
+
+          case WAIT500:
+            wait_time = 500;
+            break;
+          
+          case WAIT100:
+            wait_time = 100;
+            break;
+
+          default:
+            wait_time = 1000;
+            break;
+        }
+      } else {
+        state = SCAN_ROWS_1_TO_7;
+        current_row = 1;
+        if (current_key != NOKEY) { /// 
+          Serial.print("New key: ");         ///
+          Serial.println(int(current_key));  ///
+        } ///
+      }
       break;
 
     // Check the keypress queue to see if next key is for this row
@@ -109,10 +146,7 @@ void loop() {
         bounce_count++;
         if (bounce_count > KEYBOUNCE_CYCLES) {
           bounce_count = 0;
-          Serial.println("Waiting a second.");  /// Delete this once done
-          prev_millis = curr_millis;            /// Delete this once done
-          state = WAIT_A_SECOND;                /// Delete this and uncomment next once done
-          ///          state = NEXT_ROW_SCAN
+          state = START_SCAN_CYCLE;
         } else {
           if (current_row < MAX_ROW) state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROWS_1_TO_7;
           else state = ACTIVE_KEYPRESS_WAITING_FOR_NEXT_SCAN_ROW_8;
@@ -157,9 +191,8 @@ void loop() {
       }
       break;
 
-    /// This is just for testing until full state machine implemented.
-    case WAIT_A_SECOND:
-      if (curr_millis - prev_millis > LOOP_DELAY) {
+    case WAIT_STATE:
+      if (curr_millis - prev_millis > wait_time) {
         state = START_SCAN_CYCLE;
       }
       break;
