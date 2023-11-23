@@ -28,7 +28,6 @@ KEYNAME theKeys[] = {
 
 keylist myKeys(sizeof(theKeys)/sizeof(theKeys[0]));
 
-#define LOOP_DELAY 1000
 #define KEYBOUNCE_CYCLES 1
 #define MAX_ROW 8
 
