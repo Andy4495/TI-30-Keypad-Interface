@@ -3,6 +3,7 @@
    https://github.com/Andy4495/TI-30-Keypad-Interface
 
    26-Oct-2023 - Andy4495 - Original
+   24-Nov-2023 - Andy4495 - Updates
 
    Library to simulate the keypad of a TI-30 calculator
 
