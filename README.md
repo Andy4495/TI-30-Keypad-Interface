@@ -1,6 +1,6 @@
 # TI-30 Keypad Interface
 
-[![Arduino Compile Sketches](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml) [![Check Markdown Links](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/CheckMarkdownLinks.yml)
+[![Arduino Compile Sketches](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/arduino-compile-sketches.yml) [![Check Markdown Links](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/check-links.yml/badge.svg)](https://github.com/Andy4495/TI-30-Keypad-Interface/actions/workflows/check-links.yml)
 
 Sketch to simulate the keypad of an old [TI-30 calculator][1] (original model, with the bubble-lens LEDs).
 
