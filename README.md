@@ -8,7 +8,7 @@ I purchased a lot of "for parts or repair" TI-30 calculators on eBay. After mixi
 
 ## Hardware
 
-The TI-30 calculator has a surprisingly simple hardware design. The calculator processosr and LED driver functions are all contained in a single chip (TI TMC0981NL) without the need for any support circuitry: no crystal, no resistors, no capacitors. The only other components are the LEDs themselves (bonded directly to the PCB), the keypad, and a 9 V (PP3) battery clip.
+The TI-30 calculator has a surprisingly simple hardware design. The calculator processor and LED driver functions are all contained in a single chip (TI TMC0981NL) without the need for any support circuitry: no crystal, no resistors, no capacitors. The only other components are the LEDs themselves (bonded directly to the PCB), the keypad, and a 9 V (PP3) battery clip.
 
 ### TI-30 Processor/Display Board and Keypad Pinouts
 
